@@ -1,1 +1,0 @@
-import{a as e,c as t,t as n}from"./entry-index-BPQhfofg.js";var r=t();function i(){let t=n.useLoaderData(),i=t.Content;return(0,r.jsx)(e,{number:t.number,title:t.title,goal:t.goal,equipment:t.equipment,children:(0,r.jsx)(i,{})})}export{i as component};

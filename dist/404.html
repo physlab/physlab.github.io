@@ -3,41 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <title>PhysLabs</title>
-    <!--
-      GitHub Pages has no server-side router, so any deep link (e.g. /physlabs/labs/pendulum)
-      that isn't a real file 404s here. This rewrites the URL into a query string and redirects
-      to the site root; index.html's inline script (see index.html) then restores the original
-      URL via history.replaceState before TanStack Router boots.
-      Technique: https://github.com/rafgraph/spa-github-pages
-
-      pathSegmentsToKeep:
-        - 1 for a PROJECT site served at https://<user>.github.io/<repo>/  (the default —
-          matches this repo being deployed as a GitHub Pages project site)
-        - 0 for a USER/ORG site served at https://<user>.github.io/ (repo named <user>.github.io)
-    -->
-    <script>
-      var pathSegmentsToKeep = 1;
+    <script type="text/javascript">
+      // Для кореневого домену physlab.github.io кодуємо шлях починаючи з 0 сегмента
+      var pathSegmentsToKeep = 0; 
       var l = window.location;
       l.replace(
-        l.protocol +
-          "//" +
-          l.hostname +
-          (l.port ? ":" + l.port : "") +
-          l.pathname
-            .split("/")
-            .slice(0, 1 + pathSegmentsToKeep)
-            .join("/") +
-          "/?/" +
-          l.pathname
-            .slice(1)
-            .split("/")
-            .slice(pathSegmentsToKeep)
-            .join("/")
-            .replace(/&/g, "~and~") +
-          (l.search ? "&" + l.search.slice(1).replace(/&/g, "~and~") : "") +
-          l.hash,
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
       );
     </script>
   </head>
   <body></body>
 </html>
+
