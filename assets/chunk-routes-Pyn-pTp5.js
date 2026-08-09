@@ -1,0 +1,1 @@
+import{t as e}from"./chunk-jsx-runtime-CmT1ij25.js";var t=e();function n(){return(0,t.jsx)(`div`,{className:`flex min-h-screen items-center justify-center bg-background`,children:(0,t.jsx)(`p`,{className:`font-display text-sm uppercase tracking-[0.35em] text-muted-foreground`,children:`PhysLabs`})})}export{n as component};
