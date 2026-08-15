@@ -1,1 +1,0 @@
-import{a as e,n as t}from"./chunk-types-B_6hitBR.js";import{t as n}from"./chunk-jsx-runtime-CmT1ij25.js";import{t as r}from"./entry-index-CdDI6J80.js";var i=n();function a(){let{slug:n}=r.useLoaderData(),a=t(n),o=a.Content;return(0,i.jsx)(e,{number:a.number??``,title:a.title,goal:a.goal,equipment:a.equipment,children:(0,i.jsx)(o,{})})}export{a as component};
