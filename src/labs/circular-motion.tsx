@@ -16,7 +16,8 @@ import velocityFormula from "@/assets/circular-motion-velocity-formula.png";
 import accelerationFormula from "@/assets/circular-motion-acceleration-formula.png";
 import type { LabDefinition } from "./types";
 
-const SIM = "https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_uk.html";
+const SIM =
+  "https://phet.colorado.edu/sims/html/gravity-and-orbits/latest/gravity-and-orbits_uk.html";
 
 function Content() {
   return (
@@ -27,37 +28,52 @@ function Content() {
         <Simulation src={SIM} title="Симуляція руху штучного супутника" />
 
         <Note>
-          Суворо дотримуйтесь інструкції з безпеки. Результати вимірювань відразу заносьте до
-          таблиці.
+          Суворо дотримуйтесь інструкції з безпеки. Результати вимірювань
+          відразу заносьте до таблиці.
         </Note>
 
         <p>
-          1. Відкрийте програму та натисніть кнопку <strong>Масштабувати (To Scale)</strong>
+          1. Відкрийте програму та натисніть кнопку{" "}
+          <strong>Масштабувати (To Scale)</strong>
         </p>
         <p>
-          2. Оберіть модель <strong>Земля та супутник</strong> (остання у списку, див. мал.)
+          2. Оберіть модель <strong>Земля та супутник</strong> (остання у
+          списку, див. мал.)
         </p>
-        <Figure src={modelSelection} alt="Вибір моделі" className="w-full max-w-lg" />
+        <Figure
+          src={modelSelection}
+          alt="Вибір моделі"
+          className="w-full max-w-lg"
+        />
 
         <p>
-          3. Виміряйте радіус траєкторії руху штучного супутника навколо Землі, використовуючи
-          інструмент <strong>Мірна стрічка</strong>. Час запишіть у метрах. Для визначення центру
-          Землі зручно увімкнути <strong>Сітку</strong>.
+          3. Виміряйте радіус траєкторії руху штучного супутника навколо Землі,
+          використовуючи інструмент <strong>Мірна стрічка</strong>. Час запишіть
+          у метрах. Для визначення центру Землі зручно увімкнути{" "}
+          <strong>Сітку</strong>.
         </p>
-        <Figure src={radiusMeasurement} alt="Вимірювання радіуса" className="w-full max-w-lg" />
+        <Figure
+          src={radiusMeasurement}
+          alt="Вимірювання радіуса"
+          className="w-full max-w-lg"
+        />
 
         <p>4. Запишіть радіус орбіти до таблиці, перевівши його в метри.</p>
         <Note>
-          Зверніть увагу, що вимірювальна стрічка показує значення радіуса в кілометрах.
+          Зверніть увагу, що вимірювальна стрічка показує значення радіуса в
+          кілометрах.
         </Note>
 
         <p>
-          5. Запустіть програму на виконання, почавши відлік зі слова «нуль», коли супутник пройде
-          точку, з якої почав рухатися, рахуємо «один» і т.д. Коли тіло пройде п'ятий оберт,
-          зупиняємо імітацію, натиснувши відповідну кнопку, й записуємо до таблиці отримане
-          значення у секундах.
+          5. Запустіть програму на виконання, почавши відлік зі слова «нуль»,
+          коли супутник пройде точку, з якої почав рухатися, рахуємо «один» і
+          т.д. Коли тіло пройде п'ятий оберт, зупиняємо імітацію, натиснувши
+          відповідну кнопку, й записуємо до таблиці отримане значення у
+          секундах.
         </p>
-        <Note>Зверніть увагу, що лічильник показує значення часу в хвилинах.</Note>
+        <Note>
+          Зверніть увагу, що лічильник показує значення часу в хвилинах.
+        </Note>
 
         <p>6. Далі розраховуємо й записуємо до таблиці:</p>
         <ul className="list-disc space-y-1 pl-5">
@@ -70,12 +86,26 @@ function Content() {
         <p className="font-semibold">Формули для розрахунку:</p>
         <div className="flex flex-wrap items-start justify-center gap-4">
           <Figure src={periodFormula} alt="Формула періоду" className="w-40" />
-          <Figure src={frequencyFormula} alt="Формула обертової частоти" className="w-40" />
-          <Figure src={velocityFormula} alt="Формула лінійної швидкості" className="w-40" />
-          <Figure src={accelerationFormula} alt="Формула доцентрового прискорення" className="w-40" />
+          <Figure
+            src={frequencyFormula}
+            alt="Формула обертової частоти"
+            className="w-40"
+          />
+          <Figure
+            src={velocityFormula}
+            alt="Формула лінійної швидкості"
+            className="w-40"
+          />
+          <Figure
+            src={accelerationFormula}
+            alt="Формула доцентрового прискорення"
+            className="w-40"
+          />
         </div>
 
-        <p>7. Повторіть дослід ще двічі, щоразу трохи збільшуючи радіус орбіти.</p>
+        <p>
+          7. Повторіть дослід ще двічі, щоразу трохи збільшуючи радіус орбіти.
+        </p>
 
         <LabTable>
           <thead>
@@ -141,7 +171,10 @@ function Content() {
       </Section>
 
       <Section title="Аналіз експерименту та його результатів">
-        <p>Проаналізуйте експеримент і його результати. Сформулюйте висновок, у якому зазначте:</p>
+        <p>
+          Проаналізуйте експеримент і його результати. Сформулюйте висновок, у
+          якому зазначте:
+        </p>
         <p>1) фізичні величини, які ви визначали;</p>
         <Answer id="visnovok1" rows={6} />
         <p>2) точність проведеного експерименту та причини похибки.</p>

@@ -36,6 +36,8 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-surface: var(--surface);
+  --color-grade-7: var(--grade-7);
+  --color-grade-8: var(--grade-8);
   --color-grade-9: var(--grade-9);
   --color-grade-10: var(--grade-10);
   --color-grade-11: var(--grade-11);
@@ -65,7 +67,9 @@
   --border: oklch(0.9 0.015 225);
   --input: oklch(0.9 0.015 225);
   --ring: oklch(0.66 0.104 205);
-  --grade-9: oklch(0.68 0.13 232);
+  --grade-7: oklch(79.484% 0.22422 135.765);
+  --grade-8: oklch(0.68 0.13 232);
+  --grade-9: oklch(53.453% 0.25103 305.252);
   --grade-10: oklch(0.72 0.13 165);
   --grade-11: oklch(0.7 0.15 35);
   --gradient-hero: linear-gradient(

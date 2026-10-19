@@ -312,7 +312,7 @@ export function ImageCanvas({
         onPointerUp={handlePointerUp}
         onPointerCancel={handlePointerUp}
         style={{ height: canvasHeight }}
-        className={`relative w-full overflow-hidden rounded-2xl border-2 border-dashed bg-card shadow-card transition-colors ${
+        className={`pdf-keep relative w-full overflow-hidden rounded-2xl border-2 border-dashed bg-card shadow-card transition-colors ${
           isDragOver ? "border-ring bg-accent/10" : "border-border"
         }`}
       >

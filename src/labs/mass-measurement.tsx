@@ -6,6 +6,7 @@ import {
   HeaderCell,
   LabTable,
   Td,
+  ImageCanvas,
 } from "@/components/lab/lab-form";
 import { Section } from "@/components/lab/lab-shell";
 import { Formula } from "@/components/formula";
@@ -102,7 +103,15 @@ function Content() {
           m<sub>води</sub> = <Cell id="water_mass" /> г
         </p>
       </Section>
-
+      <Section title="Фото установки">
+        <ImageCanvas
+          label="Прикріпіть фото установки"
+          height={400}
+          minHeight={250}
+          maxHeight={700}
+          maxImages={6}
+        />
+      </Section>
       <Section title="Аналіз експерименту та його результатів">
         <p>Зробіть висновок, у якому зазначте:</p>
 

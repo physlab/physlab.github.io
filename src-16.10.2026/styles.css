@@ -1,0 +1,147 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * PhysLabs design system — deep-ocean scientific palette.
+ * All colors are oklch semantic tokens. Never hardcode colors in components.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-surface: var(--surface);
+  --color-grade-7: var(--grade-7);
+  --color-grade-8: var(--grade-8);
+  --color-grade-9: var(--grade-9);
+  --color-grade-10: var(--grade-10);
+  --color-grade-11: var(--grade-11);
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --radius: 0.875rem;
+  --background: oklch(0.982 0.006 220);
+  --foreground: oklch(0.24 0.045 245);
+  --surface: oklch(0.955 0.012 220);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.24 0.045 245);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.24 0.045 245);
+  --primary: oklch(0.33 0.083 247);
+  --primary-foreground: oklch(0.985 0.008 210);
+  --secondary: oklch(0.94 0.02 215);
+  --secondary-foreground: oklch(0.3 0.06 245);
+  --muted: oklch(0.945 0.012 220);
+  --muted-foreground: oklch(0.52 0.03 235);
+  --accent: oklch(0.66 0.104 205);
+  --accent-foreground: oklch(0.19 0.04 245);
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.985 0.008 210);
+  --border: oklch(0.9 0.015 225);
+  --input: oklch(0.9 0.015 225);
+  --ring: oklch(0.66 0.104 205);
+  --grade-7: oklch(79.484% 0.22422 135.765);
+  --grade-8: oklch(0.68 0.13 232);
+  --grade-9: oklch(53.453% 0.25103 305.252);
+  --grade-10: oklch(0.72 0.13 165);
+  --grade-11: oklch(0.7 0.15 35);
+  --gradient-hero: linear-gradient(
+    140deg,
+    oklch(0.28 0.075 250) 0%,
+    oklch(0.33 0.083 235) 45%,
+    oklch(0.5 0.1 205) 100%
+  );
+  --gradient-accent: linear-gradient(
+    100deg,
+    oklch(0.66 0.104 205),
+    oklch(0.75 0.12 175)
+  );
+  --shadow-card: 0 1px 2px oklch(0.24 0.045 245 / 0.06),
+    0 12px 32px -18px oklch(0.24 0.045 245 / 0.35);
+  --shadow-lift: 0 2px 6px oklch(0.24 0.045 245 / 0.08),
+    0 24px 48px -24px oklch(0.33 0.083 247 / 0.5);
+}
+
+.dark {
+  --background: oklch(0.19 0.03 248);
+  --foreground: oklch(0.96 0.008 220);
+  --surface: oklch(0.23 0.035 248);
+  --card: oklch(0.24 0.037 248);
+  --card-foreground: oklch(0.96 0.008 220);
+  --popover: oklch(0.24 0.037 248);
+  --popover-foreground: oklch(0.96 0.008 220);
+  --primary: oklch(0.72 0.11 200);
+  --primary-foreground: oklch(0.18 0.03 248);
+  --secondary: oklch(0.3 0.04 248);
+  --secondary-foreground: oklch(0.96 0.008 220);
+  --muted: oklch(0.29 0.035 248);
+  --muted-foreground: oklch(0.72 0.025 225);
+  --accent: oklch(0.72 0.11 200);
+  --accent-foreground: oklch(0.18 0.03 248);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.72 0.11 200);
+}
+
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-gradient-accent {
+  background-image: var(--gradient-accent);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-lift {
+  box-shadow: var(--shadow-lift);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}

@@ -18,12 +18,12 @@ export function LabShell({
     <div className="min-h-screen bg-background">
       <header className="bg-gradient-hero px-4 pb-14 pt-8 text-primary-foreground">
         <div className="mx-auto max-w-4xl">
-          <Link
+          {/* <Link
             to="/"
             className="inline-flex items-center gap-2 rounded-full border border-primary-foreground/25 px-4 py-1.5 text-sm font-medium text-primary-foreground/90 transition hover:bg-primary-foreground/10"
           >
             ← До списку робіт
-          </Link>
+          </Link> */}
           <p className="mt-8 font-display text-sm uppercase tracking-[0.2em] text-primary-foreground/70">
             Лабораторна робота {number}
           </p>

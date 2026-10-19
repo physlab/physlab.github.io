@@ -201,6 +201,205 @@ async function waitForImages(root: HTMLElement): Promise<void> {
   );
 }
 
+
+/* ------------------------------------------------------------------ */
+/*  Заповнені поля → звичайні блоки, розумне розбиття на сторінки      */
+/* ------------------------------------------------------------------ */
+
+const TEXT_LIKE_INPUT_TYPES = new Set([
+  "",
+  "text",
+  "number",
+  "email",
+  "search",
+  "tel",
+  "url",
+]);
+
+// Властивості, які переносимо з поля на блок, що його замінює,
+// щоб у PDF вигляд клітинки/поля лишився таким самим.
+const COPIED_STYLE_PROPS = [
+  "boxSizing",
+  "width",
+  "minWidth",
+  "maxWidth",
+  "marginTop",
+  "marginRight",
+  "marginBottom",
+  "marginLeft",
+  "paddingTop",
+  "paddingRight",
+  "paddingBottom",
+  "paddingLeft",
+  "borderTopWidth",
+  "borderRightWidth",
+  "borderBottomWidth",
+  "borderLeftWidth",
+  "borderTopStyle",
+  "borderRightStyle",
+  "borderBottomStyle",
+  "borderLeftStyle",
+  "borderTopColor",
+  "borderRightColor",
+  "borderBottomColor",
+  "borderLeftColor",
+  "borderTopLeftRadius",
+  "borderTopRightRadius",
+  "borderBottomLeftRadius",
+  "borderBottomRightRadius",
+  "backgroundColor",
+  "color",
+  "fontFamily",
+  "fontSize",
+  "fontWeight",
+  "fontStyle",
+  "lineHeight",
+  "letterSpacing",
+  "textAlign",
+] as const;
+
+/**
+ * Замінює в переданому документі (клоні для знімку) усі текстові
+ * <input> та <textarea> на <div>, у який вписано значення з живої сторінки.
+ * Символи переносу рядків перетворюються на <br>, висота блоку росте
+ * разом з текстом — тож нічого не ховається за межами поля.
+ */
+function replaceFieldsWithDivs(liveRoot: HTMLElement, clonedDoc: Document) {
+  const liveFields = Array.from(
+    liveRoot.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      "input, textarea",
+    ),
+  );
+  const clonedFields = Array.from(
+    clonedDoc.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+      "input, textarea",
+    ),
+  );
+  const view = clonedDoc.defaultView;
+  if (!view) return;
+
+  liveFields.forEach((liveEl, i) => {
+    const clonedEl = clonedFields[i];
+    if (!clonedEl) return;
+    const isTextarea = liveEl.tagName === "TEXTAREA";
+    if (
+      !isTextarea &&
+      !TEXT_LIKE_INPUT_TYPES.has((liveEl as HTMLInputElement).type ?? "")
+    ) {
+      return; // checkbox, file, range тощо — не чіпаємо
+    }
+
+    const value = liveEl.value ?? "";
+    const computed = view.getComputedStyle(clonedEl);
+    const originalHeight = clonedEl.getBoundingClientRect().height;
+
+    const div = clonedDoc.createElement("div");
+    COPIED_STYLE_PROPS.forEach((prop) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (div.style as any)[prop] = (computed as any)[prop];
+    });
+    div.style.display = "block";
+    div.style.height = "auto";
+    // Мінімальна висота = висота поля, щоб порожнє поле лишилось рамкою
+    div.style.minHeight = `${originalHeight}px`;
+    div.style.whiteSpace = "normal";
+    div.style.overflow = "visible";
+    div.style.overflowWrap = "anywhere";
+    div.style.wordBreak = "break-word";
+    div.style.verticalAlign = "top";
+    // Переносимо id, щоб не плуталися стилі/селектори
+    div.setAttribute("data-pdf-field", clonedEl.id || "");
+
+    const lines = value.replace(/\r\n?/g, "\n").split("\n");
+    lines.forEach((line, idx) => {
+      if (idx > 0) div.appendChild(clonedDoc.createElement("br"));
+      div.appendChild(clonedDoc.createTextNode(line));
+    });
+
+    clonedEl.replaceWith(div);
+  });
+}
+
+type Interval = [number, number];
+
+/**
+ * Збирає вертикальні "заборонені" інтервали (у CSS-пікселях від верху
+ * документа), всередині яких не можна різати сторінку PDF:
+ * кожен рядок тексту, картинки/полотна, рядки таблиць, заголовки
+ * (разом з відступом до наступного рядка) та елементи з класом pdf-keep.
+ */
+function collectUnbreakableIntervals(doc: Document): Interval[] {
+  const root = doc.body;
+  const docTop = doc.documentElement.getBoundingClientRect().top;
+  const result: Interval[] = [];
+  const push = (top: number, bottom: number) => {
+    if (bottom - top > 0.5) result.push([top - docTop, bottom - docTop]);
+  };
+
+  // Рядки тексту
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const range = doc.createRange();
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    const parent = (node as Text).parentElement;
+    if (!parent) continue;
+    const tag = parent.tagName;
+    if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") continue;
+    if (!(node as Text).data.trim()) continue;
+    range.selectNodeContents(node);
+    for (const r of Array.from(range.getClientRects())) {
+      push(r.top - 1, r.bottom + 1);
+    }
+  }
+
+  // Неподільні елементи
+  root
+    .querySelectorAll("img, canvas, svg, tr, .pdf-keep")
+    .forEach((el) => {
+      const r = el.getBoundingClientRect();
+      push(r.top, r.bottom);
+    });
+
+  // Заголовки не повинні лишатися самі внизу сторінки
+  root.querySelectorAll("h1, h2, h3, h4, h5, h6").forEach((el) => {
+    const r = el.getBoundingClientRect();
+    push(r.top, r.bottom + 28);
+  });
+
+  return result.sort((a, b) => a[0] - b[0]);
+}
+
+/**
+ * Обчислює позиції розрізів: кожна сторінка заповнюється максимально,
+ * але розріз завжди припадає на проміжок між блоками/рядками.
+ * Усі значення — у CSS-пікселях.
+ */
+function computePageBreaks(
+  intervals: Interval[],
+  contentEnd: number,
+  pageHeight: number,
+): number[] {
+  const breaks: number[] = [0];
+  let pos = 0;
+  while (contentEnd - pos > pageHeight + 0.5) {
+    const limit = pos + pageHeight;
+    let y = limit;
+    // Поки точка розрізу потрапляє всередину неподільного блоку —
+    // піднімаємо її над цим блоком.
+    for (let guard = 0; guard < 10000; guard++) {
+      const hit = intervals.find(([a, b]) => a < y && y < b);
+      if (!hit) break;
+      y = hit[0] - 1;
+    }
+    // Якщо блок вищий за сторінку і підходящого місця немає — ріжемо по ліміту
+    if (y <= pos + pageHeight * 0.3) y = limit;
+    breaks.push(y);
+    pos = y;
+  }
+  breaks.push(contentEnd);
+  return breaks;
+}
+
 export function LabForm({
   sheetName,
   children,
@@ -310,83 +509,119 @@ export function LabForm({
       }
       await waitForImages(element);
 
+      // Лімити розміру canvas у браузерах (особливо iOS Safari ≈ 16.7 млн px):
+      // для дуже довгих сторінок зменшуємо масштаб, щоб знімок не обрізався.
+      const docWidth = Math.max(
+        document.documentElement.scrollWidth,
+        document.body.scrollWidth,
+      );
+      const docHeightEstimate =
+        Math.max(
+          document.documentElement.scrollHeight,
+          document.body.scrollHeight,
+        ) * 1.3; // запас: блоки замість полів можуть стати вищими
+      const scale = Math.max(
+        0.6,
+        Math.min(
+          1.5,
+          16000 / docHeightEstimate,
+          Math.sqrt(16_000_000 / (docWidth * docHeightEstimate)),
+        ),
+      );
+
+      // Проміжки, де дозволено розрізати сторінку (заповнюється в onclone)
+      let intervals: Interval[] = [];
+      let measuredContentEnd = 0;
+
       const [canvas, techInfo, hasCyrillicFont] = await Promise.all([
         html2canvas(element, {
           useCORS: true,
-          scale: 1.5,
+          scale,
           // html2canvas-pro сам коректно парсить сучасні CSS-кольори
           // (oklch/oklab тощо) у класичному рендері — foreignObjectRendering
           // тут не потрібен і до того ж ламає відображення картинок.
           foreignObjectRendering: false,
           backgroundColor: "#ffffff",
           imageTimeout: 15000,
-          // Клон, який html2canvas будує внутрішньо для рендеру, іноді
-          // не підхоплює поточні значення контрольованих React-полів —
-          // прописуємо їх вручну.
           onclone: (clonedDoc: Document) => {
-            const liveFields = element.querySelectorAll("input, textarea");
-            const clonedFields = clonedDoc.querySelectorAll("input, textarea");
-            liveFields.forEach((liveEl, i) => {
-              const clonedEl = clonedFields[i] as
-                HTMLInputElement | HTMLTextAreaElement | undefined;
-              if (!clonedEl) return;
-              if (liveEl.tagName === "TEXTAREA") {
-                clonedEl.textContent = (liveEl as HTMLTextAreaElement).value;
-              } else {
-                clonedEl.setAttribute(
-                  "value",
-                  (liveEl as HTMLInputElement).value,
-                );
-              }
-            });
+            // 1) input/textarea → div з повним текстом (переноси → <br>)
+            replaceFieldsWithDivs(element, clonedDoc);
+            // 2) міряємо макет уже після заміни, щоб знати, де можна різати
+            intervals = collectUnbreakableIntervals(clonedDoc);
+            const docTop = clonedDoc.documentElement.getBoundingClientRect().top;
+            const bodyRect = clonedDoc.body.getBoundingClientRect();
+            measuredContentEnd = bodyRect.bottom - docTop;
           },
         }),
         getClientTechInfo(),
         loadCyrillicFont(pdf),
       ]);
 
-      // JPEG замість PNG — головна економія на вазі файлу
-      const imgData = canvas.toDataURL("image/jpeg", 0.85);
+      // ---- Розбиття на сторінки A4 без розрізання рядків ----
+      const pageWidthMm = 210;
+      const pageHeightMm = 297;
+      const marginYmm = 8; // білі поля зверху й знизу кожної сторінки
 
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(
-        imgData,
-        "JPEG",
-        0,
-        position,
-        imgWidth,
-        imgHeight,
-        undefined,
-        "MEDIUM",
+      const cssWidth = canvas.width / scale;
+      const cssTotal = canvas.height / scale;
+      // Прибираємо порожній "хвіст" внизу сторінки (відступи)
+      const lastBottom = intervals.reduce((m, [, b]) => Math.max(m, b), 0);
+      const contentEnd = Math.min(
+        cssTotal,
+        Math.max(lastBottom + 24, 1),
+        measuredContentEnd || cssTotal,
       );
-      heightLeft -= pageHeight;
+      const usableMm = pageHeightMm - 2 * marginYmm;
+      const pageHeightCss = (usableMm / pageWidthMm) * cssWidth;
 
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
+      const breaks = computePageBreaks(intervals, contentEnd, pageHeightCss);
+
+      for (let i = 0; i < breaks.length - 1; i++) {
+        const srcY = Math.round(breaks[i] * scale);
+        const srcH = Math.min(
+          canvas.height - srcY,
+          Math.round(breaks[i + 1] * scale) - srcY,
+        );
+        if (srcH <= 0) continue;
+
+        const slice = document.createElement("canvas");
+        slice.width = canvas.width;
+        slice.height = srcH;
+        const sctx = slice.getContext("2d");
+        if (!sctx) throw new Error("Не вдалося створити canvas для сторінки");
+        sctx.fillStyle = "#ffffff";
+        sctx.fillRect(0, 0, slice.width, slice.height);
+        sctx.drawImage(
+          canvas,
+          0,
+          srcY,
+          canvas.width,
+          srcH,
+          0,
+          0,
+          canvas.width,
+          srcH,
+        );
+
+        if (i > 0) pdf.addPage();
         pdf.addImage(
-          imgData,
+          slice.toDataURL("image/jpeg", 0.85),
           "JPEG",
           0,
-          position,
-          imgWidth,
-          imgHeight,
+          marginYmm,
+          pageWidthMm,
+          (srcH / canvas.width) * pageWidthMm,
           undefined,
           "MEDIUM",
         );
-        heightLeft -= pageHeight;
       }
+
+      const imgWidth = pageWidthMm;
 
       // Технічна інформація йде окремою сторінкою в самому кінці файлу
       addTechInfoPage(pdf, techInfo, imgWidth, hasCyrillicFont);
 
-      pdf.save("form-data.pdf");
+      pdf.save(`${values.klas} ${values.name}.pdf`);
     } catch (error) {
       console.error("Помилка генерації PDF:", error);
       alert(

@@ -53,12 +53,12 @@ function LabNotFound() {
       <p className="text-muted-foreground">
         Можливо, її ще не перенесено в онлайн-формат, або посилання застаріле.
       </p>
-      <Link
+      {/* <Link
         to="/"
         className="rounded-full bg-gradient-accent px-6 py-2.5 font-medium text-accent-foreground"
       >
         ← До списку робіт
-      </Link>
+      </Link> */}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { gradesInUse, labsByGrade } from "@/labs/registry";
 import { gradeCaption } from "@/labs/grade-labels";
-import { VISIBLE_GRADES } from "@/labs/grades-config";
+import { codeForGrade } from "@/labs/access-codes";
 import type { Grade } from "@/labs/types";
 import { LabsList } from "@/components/labs-list";
 
@@ -14,9 +14,10 @@ const gradeStyles: Record<Grade, { dot: string; bar: string }> = {
 };
 
 export function HomeContent() {
-  // Only grades that both have labs AND are turned on in grades-config.ts.
-  const visibleGrades = gradesInUse.filter((grade) =>
-    VISIBLE_GRADES.includes(grade),
+  // Only grades that both have labs AND have a code configured in
+  // access-codes.ts (a grade with no code is simply not shown or linkable).
+  const visibleGrades = gradesInUse.filter(
+    (grade) => codeForGrade(grade) !== undefined,
   );
 
   return (
@@ -41,6 +42,10 @@ export function HomeContent() {
         <div className="grid gap-6 lg:grid-cols-3">
           {visibleGrades.map((grade) => {
             const gradeLabs = labsByGrade(grade);
+            const code = codeForGrade(grade);
+            // Shouldn't happen (we just filtered on this), but keeps
+            // TypeScript honest and avoids ever emitting a broken link.
+            if (!code) return null;
             return (
               <section
                 key={grade}
@@ -49,8 +54,8 @@ export function HomeContent() {
                 <div className={`h-1.5 w-full ${gradeStyles[grade].bar}`} />
                 <div className="p-6">
                   <Link
-                    to="/grades/$grade"
-                    params={{ grade: String(grade) }}
+                    to="/grades/$code"
+                    params={{ code }}
                     className="group flex items-center gap-4 border-b border-border pb-5"
                   >
                     <span

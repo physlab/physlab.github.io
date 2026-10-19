@@ -6,6 +6,7 @@ import {
   HeaderCell,
   LabTable,
   Td,
+  ImageCanvas,
 } from "@/components/lab/lab-form";
 import { Figure, Section } from "@/components/lab/lab-shell";
 import techniqueScheme from "@/assets/rotation-period-technique-scheme.png";
@@ -126,6 +127,15 @@ function Content() {
         </p>
 
         <p>Занесіть обчислені значення T, n і v до таблиці.</p>
+      </Section>
+      <Section title="Фото установки">
+        <ImageCanvas
+          label="Прикріпіть фото установки"
+          height={400}
+          minHeight={250}
+          maxHeight={700}
+          maxImages={6}
+        />
       </Section>
 
       <Section title="Аналіз експерименту та його результатів">
